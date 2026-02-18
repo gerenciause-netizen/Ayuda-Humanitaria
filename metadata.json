@@ -1,0 +1,7 @@
+{
+  "name": "Generador de Poster de Ayuda Humanitaria",
+  "description": "Una aplicación para crear posters de recaudación de fondos médicos con un diseño profesional y empático.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
