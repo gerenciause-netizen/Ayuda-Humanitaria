@@ -27,6 +27,13 @@ const INITIAL_DATA: PosterData = {
   pagoMovilBank: "",
   pagoMovilPhone: "",
   pagoMovilId: "",
+  bankName: "",
+  bankAccountNumber: "",
+  bankAccountType: "",
+  bankAccountHolder: "",
+  bankAccountId: "",
+  yappyPhone: "",
+  yappyHolder: "",
   contactPhones: ["", ""],
   photoUrl: null,
   medicalReportUrl: null,
@@ -124,6 +131,13 @@ const App: React.FC = () => {
           pagoMovilBank: poster.pago_movil_bank || "",
           pagoMovilPhone: poster.pago_movil_phone || "",
           pagoMovilId: poster.pago_movil_id || "",
+          bankName: poster.bank_name || "",
+          bankAccountNumber: poster.bank_account_number || "",
+          bankAccountType: poster.bank_account_type || "",
+          bankAccountHolder: poster.bank_account_holder || "",
+          bankAccountId: poster.bank_account_id || "",
+          yappyPhone: poster.yappy_phone || "",
+          yappyHolder: poster.yappy_holder || "",
           contactPhones: poster.contact_phones || ["", ""],
           photoUrl: poster.photo_url || null,
           medicalReportUrl: poster.medical_report_url || null,
@@ -136,7 +150,6 @@ const App: React.FC = () => {
         setPublishedUrl(window.location.origin + window.location.pathname + '?id=' + id);
         updateUrlSilently(id);
         
-        // Cargar donaciones
         const { data: list } = await supabase.from('donations').select('*').eq('poster_id', id).order('created_at', { ascending: false });
         setDonations(list || []);
       } else {
@@ -167,6 +180,13 @@ const App: React.FC = () => {
       pago_movil_bank: data.pagoMovilBank,
       pago_movil_phone: data.pagoMovilPhone,
       pago_movil_id: data.pagoMovilId,
+      bank_name: data.bankName,
+      bank_account_number: data.bankAccountNumber,
+      bank_account_type: data.bankAccountType,
+      bank_account_holder: data.bankAccountHolder,
+      bank_account_id: data.bankAccountId,
+      yappy_phone: data.yappyPhone,
+      yappy_holder: data.yappyHolder,
       contact_phones: data.contactPhones,
       photo_url: data.photoUrl,
       medical_report_url: data.medicalReportUrl,

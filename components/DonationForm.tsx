@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { supabase } from '../supabase';
-import { Heart, X, CheckCircle2, Camera, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Heart, X, CheckCircle2, Loader2, Image as ImageIcon } from 'lucide-react';
 
 interface DonationFormProps {
   posterId: string;
@@ -37,7 +37,6 @@ export const DonationForm: React.FC<DonationFormProps> = ({ posterId, onClose, o
     let proof_url = '';
 
     try {
-      // 1. Subir imagen si existe
       if (imageFile) {
         const fileExt = imageFile.name.split('.').pop();
         const fileName = `${posterId}/${Math.random()}.${fileExt}`;
@@ -54,7 +53,6 @@ export const DonationForm: React.FC<DonationFormProps> = ({ posterId, onClose, o
         proof_url = publicUrl;
       }
 
-      // 2. Guardar registro en la tabla donations
       const { error } = await supabase
         .from('donations')
         .insert([{
@@ -74,7 +72,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({ posterId, onClose, o
       }, 2000);
     } catch (err) {
       console.error("Error al registrar:", err);
-      alert("Error al registrar el aporte. Verifica que el bucket 'proofs' exista en Supabase.");
+      alert("Error al registrar el aporte.");
     } finally {
       setIsSubmitting(false);
     }
@@ -87,7 +85,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({ posterId, onClose, o
           <CheckCircle2 size={32} />
         </div>
         <h2 className="text-2xl font-bold text-slate-800 mb-2">¡Aporte Registrado!</h2>
-        <p className="text-slate-500">Tu generosidad es una bendición para Nuvia y su familia.</p>
+        <p className="text-slate-500">Tu generosidad es una bendición.</p>
       </div>
     );
   }
@@ -105,13 +103,13 @@ export const DonationForm: React.FC<DonationFormProps> = ({ posterId, onClose, o
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
-          {['Zelle', 'Pago Movil'].map(method => (
+        <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl">
+          {['Zelle', 'Pago Movil', 'Banco', 'Yappy'].map(method => (
             <button
               key={method}
               type="button"
               onClick={() => setPaymentMethod(method)}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${
+              className={`py-2 rounded-lg text-[10px] font-bold transition ${
                 paymentMethod === method ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
               }`}
             >
@@ -144,9 +142,8 @@ export const DonationForm: React.FC<DonationFormProps> = ({ posterId, onClose, o
           />
         </div>
 
-        {/* Captura de Comprobante */}
         <div>
-          <label className="text-[10px] font-bold text-slate-500 uppercase ml-1 tracking-widest">Foto del Comprobante</label>
+          <label className="text-[10px] font-bold text-slate-500 uppercase ml-1 tracking-widest">Comprobante de Pago</label>
           <div className="mt-1 relative group">
             <input 
               type="file" 
@@ -160,14 +157,11 @@ export const DonationForm: React.FC<DonationFormProps> = ({ posterId, onClose, o
               {imagePreview ? (
                 <div className="relative">
                   <img src={imagePreview} className="h-24 w-auto rounded-lg object-contain" />
-                  <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full p-0.5">
-                    <CheckCircle2 size={12} />
-                  </div>
                 </div>
               ) : (
                 <>
                   <ImageIcon size={24} className="text-slate-400" />
-                  <span className="text-xs text-slate-500">Subir captura o foto</span>
+                  <span className="text-xs text-slate-500">Subir captura</span>
                 </>
               )}
             </div>
@@ -175,7 +169,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({ posterId, onClose, o
         </div>
 
         <div>
-          <label className="text-[10px] font-bold text-slate-500 uppercase ml-1 tracking-widest">Mensaje (opcional)</label>
+          <label className="text-[10px] font-bold text-slate-500 uppercase ml-1 tracking-widest">Mensaje</label>
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -190,7 +184,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({ posterId, onClose, o
           className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <Heart size={20} className="fill-white" />}
-          {isSubmitting ? "Registrando aporte..." : "Confirmar mi Donación"}
+          {isSubmitting ? "Registrando..." : "Confirmar mi Donación"}
         </button>
       </form>
     </div>

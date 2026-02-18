@@ -1,7 +1,7 @@
 
 import React, { forwardRef } from 'react';
 import { PosterData, ThemeColor, Donation } from '../types';
-import { Heart, Phone, Quote, TrendingUp, FileText, User, Stethoscope, MapPin, Building2, CreditCard } from 'lucide-react';
+import { Heart, Phone, Quote, FileText, User, Stethoscope, MapPin, Building2, CreditCard, Smartphone } from 'lucide-react';
 
 interface PosterPreviewProps {
   data: PosterData;
@@ -74,7 +74,7 @@ export const PosterPreview = forwardRef<HTMLDivElement, PosterPreviewProps>(({ d
   const patientName = data?.patientName || "Nombre del Paciente";
   const condition = data?.condition || "Diagnóstico Médico";
   const procedure = data?.procedure || "Tratamiento / Cirugía";
-  const description = data?.description || "Tu generosidad es la esperanza que nuestra familia necesita. Cada aporte, por pequeño que sea, nos acerca un paso más a la recuperación.";
+  const description = data?.description || "Tu generosidad es la esperanza que nuestra familia necesita.";
 
   const getNameFontSize = (name: string) => {
     const len = name.length;
@@ -117,7 +117,7 @@ export const PosterPreview = forwardRef<HTMLDivElement, PosterPreviewProps>(({ d
       </header>
 
       <div className="grid grid-cols-12 gap-3 relative z-10 mb-4 shrink-0">
-        <div className="col-span-5 flex flex-col items-center">
+        <div className="col-span-5 flex flex-col items-center gap-2">
           <div className="relative">
             <div className={`relative w-24 h-24 md:w-32 md:h-32 rounded-[2rem] border-4 border-white shadow-xl overflow-hidden z-20`}>
               {data?.photoUrl ? (
@@ -131,7 +131,7 @@ export const PosterPreview = forwardRef<HTMLDivElement, PosterPreviewProps>(({ d
             <div className={`absolute -inset-1 ${colors.primary} rounded-[2.2rem] blur-lg opacity-20`}></div>
           </div>
           
-          <div className="mt-3 w-full bg-white/80 p-2 rounded-xl border border-white text-center shadow-sm">
+          <div className="w-full bg-white/80 p-2 rounded-xl border border-white text-center shadow-sm">
             <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter mb-1">Información / Contacto:</p>
             <div className="flex flex-col gap-1">
               {(data?.contactPhones || []).filter(p => p).slice(0, 2).map((phone, i) => (
@@ -141,6 +141,18 @@ export const PosterPreview = forwardRef<HTMLDivElement, PosterPreviewProps>(({ d
               ))}
             </div>
           </div>
+
+          {/* Yappy Section - Compact */}
+          {data?.yappyPhone && (
+            <div className="w-full bg-blue-500 p-2 rounded-xl border border-white shadow-md text-white overflow-hidden">
+               <div className="flex items-center gap-1 mb-1">
+                 <Smartphone size={10} />
+                 <span className="text-[8px] font-black uppercase">YAPPY</span>
+               </div>
+               <p className="text-[10px] font-black leading-none mb-0.5">{data.yappyPhone}</p>
+               <p className="text-[7px] font-bold opacity-80 truncate">{data.yappyHolder}</p>
+            </div>
+          )}
         </div>
 
         <div className="col-span-7 flex flex-col gap-2">
@@ -164,86 +176,80 @@ export const PosterPreview = forwardRef<HTMLDivElement, PosterPreviewProps>(({ d
             <div className="h-px bg-white/10 w-full"></div>
 
             {/* Zelle Section */}
-            <div className="flex items-start gap-2">
-              <div className="w-7 h-7 bg-blue-500 rounded-lg flex items-center justify-center shadow-md shrink-0 border border-white/20">
-                <span className="text-[10px] font-black text-white">Z</span>
+            {(data?.zelleEmail) && (
+              <div className="flex items-start gap-2">
+                <div className="w-7 h-7 bg-blue-500 rounded-lg flex items-center justify-center shadow-md shrink-0 border border-white/20">
+                  <span className="text-[10px] font-black text-white">Z</span>
+                </div>
+                <div className="overflow-hidden">
+                  <p className={`text-[7px] ${colors.cardMuted} font-black uppercase leading-none mb-0.5`}>Zelle</p>
+                  <p className="text-[9px] font-black truncate leading-tight">{data.zelleEmail}</p>
+                  <p className="text-[7px] font-bold opacity-60 truncate">{data.zelleHolder}</p>
+                </div>
               </div>
-              <div className="overflow-hidden">
-                <p className={`text-[7px] ${colors.cardMuted} font-black uppercase leading-none mb-0.5`}>Zelle</p>
-                <p className="text-[9px] font-black truncate leading-tight">{data?.zelleEmail || 'A Consultar'}</p>
-                {data?.zelleHolder && <p className="text-[7px] font-bold opacity-60 truncate">{data.zelleHolder}</p>}
-              </div>
-            </div>
+            )}
 
-            {/* Pago Móvil Section - Expanded */}
-            <div className="flex items-start gap-2">
-              <div className="w-7 h-7 bg-green-500 rounded-lg flex items-center justify-center shadow-md shrink-0 border border-white/20">
-                <span className="text-[9px] font-black text-white">PM</span>
-              </div>
-              <div className="overflow-hidden flex flex-col gap-0.5 w-full">
-                <p className={`text-[7px] ${colors.cardMuted} font-black uppercase leading-none`}>Pago Móvil</p>
-                <div className="flex flex-col gap-0.5">
-                  {data?.pagoMovilBank && (
-                    <div className="flex items-center gap-1">
-                      <Building2 size={7} className="opacity-50" />
-                      <p className="text-[9px] font-black truncate leading-tight">{data.pagoMovilBank}</p>
-                    </div>
-                  )}
-                  {data?.pagoMovilId && (
-                    <div className="flex items-center gap-1">
-                      <CreditCard size={7} className="opacity-50" />
-                      <p className="text-[9px] font-black truncate leading-tight">{data.pagoMovilId}</p>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1">
-                    <Phone size={7} className="opacity-50" />
-                    <p className="text-[10px] font-black truncate leading-tight text-white">{data?.pagoMovilPhone || 'A Consultar'}</p>
+            {/* Pago Móvil Section */}
+            {(data?.pagoMovilPhone) && (
+              <div className="flex items-start gap-2">
+                <div className="w-7 h-7 bg-green-500 rounded-lg flex items-center justify-center shadow-md shrink-0 border border-white/20">
+                  <span className="text-[9px] font-black text-white">PM</span>
+                </div>
+                <div className="overflow-hidden flex flex-col gap-0.5 w-full">
+                  <p className={`text-[7px] ${colors.cardMuted} font-black uppercase leading-none`}>Pago Móvil</p>
+                  <p className="text-[10px] font-black truncate leading-tight">{data.pagoMovilPhone}</p>
+                  <div className="flex gap-1.5 opacity-60 text-[7px] font-bold overflow-hidden">
+                    <span className="truncate">{data.pagoMovilBank}</span>
+                    <span className="shrink-0">{data.pagoMovilId}</span>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
+            )}
 
-      {/* Información Médica Section with Subtitles */}
-      <div className="relative z-10 mb-4 shrink-0">
-        <div className={`${colors.primary} py-1.5 px-4 rounded-t-2xl shadow-md flex items-center justify-center gap-2`}>
-          <Stethoscope size={14} className="text-white/80" />
-          <p className="font-black uppercase tracking-[0.2em] text-white text-[9px]">Información Médica</p>
-        </div>
-        <div className="bg-white p-3 rounded-b-2xl border border-white shadow-lg flex flex-col gap-2">
-          <div>
-            <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest text-center mb-0.5">Diagnóstico</p>
-            <p className="text-[11px] font-black text-slate-800 leading-tight uppercase text-center">{condition}</p>
-          </div>
-          <div className={`h-0.5 w-12 mx-auto rounded-full ${colors.primary} opacity-10`}></div>
-          <div>
-            <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest text-center mb-0.5">Procedimiento Médico</p>
-            <p className={`text-[10px] font-black ${colors.text} leading-tight uppercase text-center`}>{procedure}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="relative z-10 flex-grow flex flex-col mb-4 min-h-[300px]">
-        <div className="bg-white p-6 md:p-8 rounded-[3rem] border-2 border-slate-50 shadow-xl flex-grow flex flex-col relative overflow-hidden group">
-          <div className="absolute -top-6 -right-6 opacity-[0.03] text-slate-900 pointer-events-none transform -rotate-12">
-            <Quote size={120} />
-          </div>
-          
-          <div className="flex items-center justify-between mb-4 relative z-10 shrink-0">
-            <div className="flex items-center gap-2.5">
-              <div className={`w-1.5 h-6 rounded-full ${colors.primary} shadow-sm`}></div>
-              <h3 className={`text-[10px] font-black ${colors.text} uppercase tracking-widest`}>Historia Médica</h3>
-            </div>
-            {data?.medicalReportUrl && (
-              <a href={data.medicalReportUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white rounded-xl text-[8px] font-black shadow-lg hover:scale-105 transition no-print">
-                <FileText size={10} /> INFORMES PDF
-              </a>
+            {/* Banco Section */}
+            {(data?.bankAccountNumber) && (
+              <div className="flex items-start gap-2 border-t border-white/5 pt-2">
+                <div className="w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center shadow-md shrink-0 border border-white/20">
+                  <Building2 size={12} className="text-white" />
+                </div>
+                <div className="overflow-hidden w-full">
+                  <p className={`text-[7px] ${colors.cardMuted} font-black uppercase leading-none mb-0.5`}>Transferencia</p>
+                  <p className="text-[9px] font-black leading-tight mb-0.5 truncate">{data.bankAccountNumber}</p>
+                  <div className="flex flex-col text-[7px] font-bold opacity-60 leading-tight">
+                    <span className="truncate">{data.bankName} - {data.bankAccountType}</span>
+                    <span className="truncate">{data.bankAccountHolder} ({data.bankAccountId})</span>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
-          
-          <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar relative z-10 min-h-0">
+        </div>
+      </div>
+
+      {/* Información Médica */}
+      <div className="relative z-10 mb-4 shrink-0">
+        <div className={`${colors.primary} py-1 px-4 rounded-t-2xl shadow-md flex items-center justify-center gap-2`}>
+          <Stethoscope size={12} className="text-white/80" />
+          <p className="font-black uppercase tracking-[0.2em] text-white text-[8px]">Detalles Médicos</p>
+        </div>
+        <div className="bg-white p-3 rounded-b-2xl border border-white shadow-lg grid grid-cols-2 gap-2">
+          <div className="text-center border-r border-slate-50 px-1">
+            <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Diagnóstico</p>
+            <p className="text-[10px] font-black text-slate-800 leading-tight uppercase">{condition}</p>
+          </div>
+          <div className="text-center px-1">
+            <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Cirugía / Proc.</p>
+            <p className={`text-[9px] font-black ${colors.text} leading-tight uppercase`}>{procedure}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="relative z-10 flex-grow flex flex-col mb-4 min-h-[250px]">
+        <div className="bg-white p-6 rounded-[2.5rem] border-2 border-slate-50 shadow-xl flex-grow flex flex-col relative overflow-hidden">
+          <div className="absolute -top-4 -right-4 opacity-[0.03] text-slate-900 pointer-events-none transform -rotate-12">
+            <Quote size={80} />
+          </div>
+          <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar relative z-10">
             <p 
               className="text-slate-800 leading-relaxed font-bold italic tracking-tight whitespace-pre-wrap text-justify"
               style={{ fontSize: getDescriptionFontSize(description) }}
@@ -251,22 +257,22 @@ export const PosterPreview = forwardRef<HTMLDivElement, PosterPreviewProps>(({ d
               "{description}"
             </p>
           </div>
-
-          <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between relative z-10 shrink-0">
+          <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between relative z-10">
              <div className="flex items-center gap-1.5">
-                <MapPin size={12} className={colors.text} />
+                <MapPin size={10} className={colors.text} />
                 <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{data?.location || "Venezuela"}</p>
              </div>
-             <div className="flex items-center gap-1.5">
-                <Heart size={12} className="text-pink-500 fill-pink-500" />
-                <span className="text-[8px] font-bold text-slate-300 uppercase">Unidos</span>
-             </div>
+             {data?.medicalReportUrl && (
+                <div className="flex items-center gap-1 px-2 py-0.5 bg-slate-100 rounded-md text-[7px] font-black text-slate-500 uppercase">
+                  <FileText size={8} /> Informe PDF Disponible
+                </div>
+             )}
           </div>
         </div>
       </div>
 
-      <footer className={`bg-white rounded-full py-4 px-8 text-center shadow-xl relative z-10 mb-2 border-2 ${colors.border} shrink-0`}>
-        <p className={`text-[11px] font-black uppercase tracking-[0.5em] ${colors.text} leading-none`}>
+      <footer className={`bg-white rounded-full py-3 px-8 text-center shadow-xl relative z-10 mb-2 border-2 ${colors.border} shrink-0`}>
+        <p className={`text-[10px] font-black uppercase tracking-[0.5em] ${colors.text} leading-none`}>
            ¡GRACIAS POR TU APOYO!
         </p>
       </footer>

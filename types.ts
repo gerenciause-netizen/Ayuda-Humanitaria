@@ -21,9 +21,18 @@ export interface PosterData {
   pagoMovilBank: string;
   pagoMovilPhone: string;
   pagoMovilId: string;
+  // Nuevos campos
+  bankName: string;
+  bankAccountNumber: string;
+  bankAccountType: string;
+  bankAccountHolder: string;
+  bankAccountId: string;
+  yappyPhone: string;
+  yappyHolder: string;
+  
   contactPhones: string[];
   photoUrl: string | null;
-  medicalReportUrl: string | null; // Nueva URL para el PDF
+  medicalReportUrl: string | null;
   thankYouMessage: string;
   totalAmount: string;
 }

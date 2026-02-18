@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { PosterData, ThemeColor } from '../types';
-import { User, Stethoscope, MapPin, CreditCard, Phone, Type, Palette, Camera, DollarSign, FileText, Upload, CheckCircle2, Loader2, Activity } from 'lucide-react';
+import { User, Stethoscope, MapPin, CreditCard, Phone, Type, Palette, Camera, DollarSign, FileText, Upload, CheckCircle2, Loader2, Activity, Building2, Smartphone } from 'lucide-react';
 import { supabase } from '../supabase';
 
 interface ControlsProps {
@@ -50,7 +50,7 @@ export const Controls: React.FC<ControlsProps> = ({ data, onChange, theme, onThe
       onChange({ medicalReportUrl: publicUrl });
     } catch (err) {
       console.error(err);
-      alert("Error al subir el PDF. Verifica que el bucket 'reports' sea público en Supabase.");
+      alert("Error al subir el PDF.");
     } finally {
       setIsUploadingPdf(false);
     }
@@ -213,58 +213,119 @@ export const Controls: React.FC<ControlsProps> = ({ data, onChange, theme, onThe
       </div>
 
       {/* Payment Info */}
-      <section className="pt-8 border-t border-slate-100">
-        <h3 className="text-base font-black text-slate-800 flex items-center gap-3 mb-6 uppercase tracking-widest">
+      <section className="pt-8 border-t border-slate-100 space-y-8">
+        <h3 className="text-base font-black text-slate-800 flex items-center gap-3 mb-2 uppercase tracking-widest">
           <CreditCard size={20} /> Datos de Pago
         </h3>
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="space-y-2 col-span-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Zelle (Correo/Titular)</label>
-            <div className="flex gap-3">
-              <input
-                type="text"
-                value={data.zelleEmail}
-                onChange={(e) => onChange({ zelleEmail: e.target.value })}
-                className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold"
-                placeholder="Correo"
-              />
-              <input
-                type="text"
-                value={data.zelleHolder}
-                onChange={(e) => onChange({ zelleHolder: e.target.value })}
-                className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold"
-                placeholder="Titular"
-              />
-            </div>
+        
+        {/* Zelle */}
+        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
+          <label className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2"><Smartphone size={12}/> Zelle</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              type="text"
+              value={data.zelleEmail}
+              onChange={(e) => onChange({ zelleEmail: e.target.value })}
+              className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+              placeholder="Correo Zelle"
+            />
+            <input
+              type="text"
+              value={data.zelleHolder}
+              onChange={(e) => onChange({ zelleHolder: e.target.value })}
+              className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+              placeholder="Nombre del Titular"
+            />
           </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Banco Pago Móvil</label>
+        </div>
+
+        {/* Pago Movil */}
+        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
+          <label className="text-[10px] font-black text-green-600 uppercase tracking-widest flex items-center gap-2"><Smartphone size={12}/> Pago Móvil (Venezuela)</label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <input
               type="text"
               value={data.pagoMovilBank}
               onChange={(e) => onChange({ pagoMovilBank: e.target.value })}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold"
-              placeholder="Ej: Mercantil"
+              className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+              placeholder="Banco"
             />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cédula</label>
             <input
               type="text"
               value={data.pagoMovilId}
               onChange={(e) => onChange({ pagoMovilId: e.target.value })}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold"
-              placeholder="Ej: V-12.345.678"
+              className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+              placeholder="Cédula"
             />
-          </div>
-          <div className="space-y-2 col-span-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Teléfono Pago Móvil</label>
             <input
               type="text"
               value={data.pagoMovilPhone}
               onChange={(e) => onChange({ pagoMovilPhone: e.target.value })}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-black"
-              placeholder="Ej: 0414-XXXXXXX"
+              className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-black"
+              placeholder="Teléfono"
+            />
+          </div>
+        </div>
+
+        {/* Banco (General) */}
+        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
+          <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-2"><Building2 size={12}/> Transferencia Bancaria</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              type="text"
+              value={data.bankName}
+              onChange={(e) => onChange({ bankName: e.target.value })}
+              className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+              placeholder="Nombre del Banco"
+            />
+            <input
+              type="text"
+              value={data.bankAccountNumber}
+              onChange={(e) => onChange({ bankAccountNumber: e.target.value })}
+              className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+              placeholder="Número de Cuenta"
+            />
+            <input
+              type="text"
+              value={data.bankAccountType}
+              onChange={(e) => onChange({ bankAccountType: e.target.value })}
+              className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+              placeholder="Tipo (Ahorro/Corriente)"
+            />
+            <input
+              type="text"
+              value={data.bankAccountHolder}
+              onChange={(e) => onChange({ bankAccountHolder: e.target.value })}
+              className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+              placeholder="Titular"
+            />
+            <input
+              type="text"
+              value={data.bankAccountId}
+              onChange={(e) => onChange({ bankAccountId: e.target.value })}
+              className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+              placeholder="ID / Cédula / RIF"
+            />
+          </div>
+        </div>
+
+        {/* Yappy */}
+        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
+          <label className="text-[10px] font-black text-blue-500 uppercase tracking-widest flex items-center gap-2"><Smartphone size={12}/> Yappy (Panamá)</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              type="text"
+              value={data.yappyPhone}
+              onChange={(e) => onChange({ yappyPhone: e.target.value })}
+              className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-black"
+              placeholder="Número de Teléfono"
+            />
+            <input
+              type="text"
+              value={data.yappyHolder}
+              onChange={(e) => onChange({ yappyHolder: e.target.value })}
+              className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold"
+              placeholder="Nombre del Titular"
             />
           </div>
         </div>
