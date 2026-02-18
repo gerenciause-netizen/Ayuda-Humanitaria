@@ -1,7 +1,7 @@
 
 import React, { forwardRef } from 'react';
 import { PosterData, ThemeColor, Donation } from '../types';
-import { Heart, Phone, Quote, FileText, User, Stethoscope, MapPin, Building2, CreditCard, Smartphone } from 'lucide-react';
+import { Heart, Phone, Quote, FileText, User, Stethoscope, MapPin, Building2, CreditCard, Smartphone, ExternalLink } from 'lucide-react';
 
 interface PosterPreviewProps {
   data: PosterData;
@@ -160,7 +160,7 @@ export const PosterPreview = forwardRef<HTMLDivElement, PosterPreviewProps>(({ d
             {totalAmountStr && (
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className={`text-[8px] font-black uppercase tracking-widest ${colors.cardMuted}`}>Meta Solidaria:</span>
+                  <span className={`text-[8px] font-black uppercase tracking-widest ${colors.cardMuted}`}>Recaudado:</span>
                   <span className="text-[10px] font-black">${totalRaised.toLocaleString()}</span>
                 </div>
                 <div className={`w-full h-2 ${colors.progressBg} rounded-full overflow-hidden`}>
@@ -263,9 +263,14 @@ export const PosterPreview = forwardRef<HTMLDivElement, PosterPreviewProps>(({ d
                 <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{data?.location || "Venezuela"}</p>
              </div>
              {data?.medicalReportUrl && (
-                <div className="flex items-center gap-1 px-2 py-0.5 bg-slate-100 rounded-md text-[7px] font-black text-slate-500 uppercase">
-                  <FileText size={8} /> Informe PDF Disponible
-                </div>
+                <a 
+                  href={data.medicalReportUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded-full text-[8px] font-black text-slate-600 uppercase transition-all shadow-sm border border-slate-200 no-print"
+                >
+                  <FileText size={10} className="text-indigo-500" /> Ver Informe Médico <ExternalLink size={8} />
+                </a>
              )}
           </div>
         </div>
