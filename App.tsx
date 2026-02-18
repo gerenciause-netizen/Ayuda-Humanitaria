@@ -5,7 +5,8 @@ import { PosterData, ThemeColor, Donation } from './types';
 import { PosterPreview } from './components/PosterPreview';
 import { Controls } from './components/Controls';
 import { DonationForm } from './components/DonationForm';
-import { Sparkles, Heart, Share2, Loader2, HandHeart, Pencil, Eye, Save, Plus, History, ChevronRight, Cloud, FolderHeart, X, Search, User, MapPin, Activity } from 'lucide-react';
+import { LoginModal } from './components/LoginModal';
+import { Sparkles, Heart, Share2, Loader2, HandHeart, Pencil, Eye, Save, Plus, History, ChevronRight, Cloud, FolderHeart, X, Search, User, MapPin, Activity, Lock, Unlock } from 'lucide-react';
 import { supabase } from './supabase';
 
 interface RemotePoster {
@@ -44,7 +45,9 @@ const INITIAL_DATA: PosterData = {
 const App: React.FC = () => {
   const [data, setData] = useState<PosterData>(INITIAL_DATA);
   const [theme, setTheme] = useState<ThemeColor>(ThemeColor.PINK);
-  const [isEditing, setIsEditing] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [posterId, setPosterId] = useState<string | null>(null);
@@ -58,12 +61,17 @@ const App: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
+    // Verificar si ya era admin en esta sesión
+    const savedAdmin = sessionStorage.getItem('isAdmin') === 'true';
+    if (savedAdmin) setIsAdmin(true);
+
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
     if (id) {
       handleLoadId(id);
     } else {
-      setIsEditing(false);
+      // Si no hay ID y es admin, empezamos editando. Si no, mostramos landing.
+      if (savedAdmin) setIsEditing(true);
     }
   }, []);
 
@@ -72,6 +80,22 @@ const App: React.FC = () => {
       fetchRemotePosters();
     }
   }, [showHistory]);
+
+  const handleLogin = (success: boolean) => {
+    if (success) {
+      setIsAdmin(true);
+      sessionStorage.setItem('isAdmin', 'true');
+      setShowLoginModal(false);
+      // Si estamos en un poster, activamos edición automáticamente al loguearnos
+      if (posterId) setIsEditing(true);
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAdmin(false);
+    setIsEditing(false);
+    sessionStorage.removeItem('isAdmin');
+  };
 
   const fetchRemotePosters = async () => {
     setIsLoadingHistory(true);
@@ -106,7 +130,7 @@ const App: React.FC = () => {
       }
       window.history.replaceState({}, '', url.toString());
     } catch (e) {
-      console.warn("No se pudo actualizar la URL del navegador (entorno protegido).");
+      console.warn("No se pudo actualizar la URL del navegador.");
     }
   };
 
@@ -129,6 +153,7 @@ const App: React.FC = () => {
           zelleEmail: poster.zelle_email || "",
           zelleHolder: poster.zelle_holder || "",
           pagoMovilBank: poster.pago_movil_bank || "",
+          pago_movil_phone: poster.pago_movil_phone || "", // Corregido: antes usaba camelCase en asignación directa
           pagoMovilPhone: poster.pago_movil_phone || "",
           pagoMovilId: poster.pago_movil_id || "",
           bankName: poster.bank_name || "",
@@ -146,7 +171,7 @@ const App: React.FC = () => {
         });
         setTheme(poster.theme as ThemeColor || ThemeColor.PINK);
         setPosterId(id);
-        setIsEditing(false);
+        setIsEditing(false); // Siempre cargar en modo lectura para donantes
         setPublishedUrl(window.location.origin + window.location.pathname + '?id=' + id);
         updateUrlSilently(id);
         
@@ -163,6 +188,7 @@ const App: React.FC = () => {
   };
 
   const performSave = async () => {
+    if (!isAdmin) return null;
     if (!data.patientName) {
       alert("Por favor ingresa el nombre del paciente.");
       return null;
@@ -229,6 +255,10 @@ const App: React.FC = () => {
   };
 
   const createNew = () => {
+    if (!isAdmin) {
+      setShowLoginModal(true);
+      return;
+    }
     if (confirm("¿Crear una nueva campaña? Se perderán los cambios no guardados.")) {
       setPosterId(null);
       setData(INITIAL_DATA);
@@ -272,31 +302,43 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-slate-50 pb-12">
       <header className="bg-white border-b sticky top-0 z-50 no-print shadow-sm">
         <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer group" onClick={createNew}>
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => window.location.href = window.location.origin + window.location.pathname}>
             <Heart size={32} className="text-pink-500 fill-pink-500 group-hover:scale-110 transition" />
             <h1 className="text-2xl font-black tracking-tighter text-slate-900">Solidaridad</h1>
           </div>
           
           <div className="flex items-center gap-3">
-            <button onClick={() => setShowHistory(true)} className="p-3 text-amber-700 bg-amber-50 rounded-xl hover:bg-amber-100 transition border border-amber-200" title="Historial">
-              <History size={20} />
-            </button>
-
-            {posterId && (
-              <button onClick={() => setIsEditing(!isEditing)} className={`p-3 rounded-xl transition ${isEditing ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}`}>
-                {isEditing ? <Eye size={20} /> : <Pencil size={20} />}
-              </button>
-            )}
-
-            {isEditing && (
+            {isAdmin ? (
               <>
-                <button onClick={performSave} disabled={isSaving} className="p-3 bg-white text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition">
-                  {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
+                <button onClick={() => setShowHistory(true)} className="p-3 text-amber-700 bg-amber-50 rounded-xl hover:bg-amber-100 transition border border-amber-200" title="Historial">
+                  <History size={20} />
                 </button>
-                <button onClick={handlePublish} disabled={isSaving} className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition font-black text-sm uppercase shadow-lg">
-                  <Share2 size={18} /> Publicar
+
+                {posterId && (
+                  <button onClick={() => setIsEditing(!isEditing)} className={`p-3 rounded-xl transition ${isEditing ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}`}>
+                    {isEditing ? <Eye size={20} /> : <Pencil size={20} />}
+                  </button>
+                )}
+
+                {isEditing && (
+                  <>
+                    <button onClick={performSave} disabled={isSaving} className="p-3 bg-white text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition">
+                      {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
+                    </button>
+                    <button onClick={handlePublish} disabled={isSaving} className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition font-black text-sm uppercase shadow-lg">
+                      <Share2 size={18} /> Publicar
+                    </button>
+                  </>
+                )}
+                
+                <button onClick={handleLogout} className="p-3 text-slate-400 hover:text-slate-600 transition" title="Cerrar Sesión Admin">
+                  <Unlock size={20} />
                 </button>
               </>
+            ) : (
+              <button onClick={() => setShowLoginModal(true)} className="p-3 text-slate-400 hover:text-slate-600 transition" title="Acceso Administrativo">
+                <Lock size={20} />
+              </button>
             )}
           </div>
         </div>
@@ -307,15 +349,17 @@ const App: React.FC = () => {
            <div className="max-w-xl mx-auto text-center py-20">
               <Heart size={80} className="text-pink-500 fill-pink-500 mx-auto mb-8 opacity-20" />
               <h2 className="text-5xl font-black mb-6 text-slate-800">Poster Solidario</h2>
-              <p className="text-xl text-slate-500 mb-10 font-bold italic">Crea una campaña profesional en minutos para ayudar a quien más lo necesita.</p>
-              <button onClick={() => setIsEditing(true)} className="w-full py-6 bg-pink-500 text-white rounded-3xl font-black text-2xl shadow-xl hover:bg-pink-600 transition flex items-center justify-center gap-4">
-                <Plus size={32} /> Nueva Campaña
-              </button>
+              <p className="text-xl text-slate-500 mb-10 font-bold italic">Apoya causas nobles con transparencia y amor.</p>
+              {isAdmin && (
+                <button onClick={createNew} className="w-full py-6 bg-pink-500 text-white rounded-3xl font-black text-2xl shadow-xl hover:bg-pink-600 transition flex items-center justify-center gap-4">
+                  <Plus size={32} /> Nueva Campaña
+                </button>
+              )}
            </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
             <div className="lg:col-span-5 space-y-8 no-print">
-              {!isEditing && posterId ? (
+              {!isEditing ? (
                 <div className="bg-white p-10 rounded-[2.5rem] shadow-xl border border-slate-100 animate-in fade-in slide-in-from-left-4">
                   <h2 className="text-4xl font-black text-slate-800 mb-8 italic">Apoya esta causa</h2>
                   <button onClick={() => setShowDonationForm(true)} className="w-full py-6 bg-pink-500 text-white rounded-2xl font-black hover:bg-pink-600 transition shadow-lg flex items-center justify-center gap-4 text-2xl">
@@ -337,15 +381,17 @@ const App: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-                  <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-xl font-black uppercase tracking-widest text-slate-400">Configuración</h2>
-                    <button onClick={refineDescription} disabled={isGenerating} className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-black border border-indigo-100">
-                      {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />} IA Historia
-                    </button>
+                isAdmin && (
+                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                    <div className="flex items-center justify-between mb-8">
+                      <h2 className="text-xl font-black uppercase tracking-widest text-slate-400">Configuración</h2>
+                      <button onClick={refineDescription} disabled={isGenerating} className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-black border border-indigo-100">
+                        {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />} IA Historia
+                      </button>
+                    </div>
+                    <Controls data={data} onChange={handleDataChange} theme={theme} onThemeChange={setTheme} />
                   </div>
-                  <Controls data={data} onChange={handleDataChange} theme={theme} onThemeChange={setTheme} />
-                </div>
+                )
               )}
             </div>
 
@@ -366,7 +412,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {showHistory && (
+      {showHistory && isAdmin && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-slate-900/90 backdrop-blur-md">
           <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
             <div className="p-6 border-b flex justify-between items-center">
@@ -396,6 +442,10 @@ const App: React.FC = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md">
           <DonationForm posterId={posterId} onClose={() => setShowDonationForm(false)} onSuccess={() => { handleLoadId(posterId); }} />
         </div>
+      )}
+
+      {showLoginModal && (
+        <LoginModal onClose={() => setShowLoginModal(false)} onLogin={handleLogin} />
       )}
     </div>
   );
